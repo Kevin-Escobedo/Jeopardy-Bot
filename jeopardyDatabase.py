@@ -16,8 +16,7 @@ class JeopardyDatabase:
     def insertQuestion(self, tweetid: int, category: str, value: int, question: str, answer: str) -> None:
         '''Inserts a question into the QUESTIONS database'''
         try:
-            now = datetime.datetime.now()
-            currentDate = "{:04d}-{:02d}-{:02d}".format(now.year, now.month, now.day)
+            currentDate = datetime.datetime.now()
             self.cursor.execute('''INSERT INTO QUESTIONS(DATE, TWEETID, CATEGORY, VALUE, QUESTION, ANSWER) VALUES(?, ?, ?, ?, ?, ?)''', (currentDate, tweetid, category, value, question, answer))
 
         except sqlite3.IntegrityError:
