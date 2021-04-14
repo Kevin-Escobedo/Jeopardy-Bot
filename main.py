@@ -3,6 +3,9 @@ import json
 import tweepy
 import datetime
 import twitterCredentials as tc #File containing api key, secret key, tokens
+import jeopardyDatabase
+
+#TO-DO: Refactor
 
 def makeTitle(s: str) -> str:
     '''Capitalizes each word in s'''
@@ -20,14 +23,12 @@ def getJeopardyQuestion() -> dict:
     link = "https://jservice.io/api/random"
     response = requests.get(link)
     jsonData = json.loads(response.text)
-    questionID = jsonData[0]["id"]
     answer = jsonData[0]["answer"]
     question = jsonData[0]["question"]
     value = jsonData[0]["value"]
     category = jsonData[0]["category"]["title"]
 
     questionInfo = dict()
-    questionInfo["id"] = questionID
     questionInfo["answer"] = answer
     questionInfo["question"] = question
     questionInfo["value"] = value
@@ -36,6 +37,7 @@ def getJeopardyQuestion() -> dict:
     return questionInfo
 
 if __name__ == "__main__":
+    jd = jeopardyDatabase.JeopardyDatabase()
     auth = tweepy.OAuthHandler(tc.API_KEY, tc.API_SECRET_KEY)
     auth.set_access_token(tc.ACCESS_TOKEN, tc.ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -43,7 +45,18 @@ if __name__ == "__main__":
         api.verify_credentials()
         jq = getJeopardyQuestion()
         message = "{} for ${}:\n{}".format(jq["category"], jq["value"], jq["question"])
-        #api.update_status(message)
-            
+        api.update_status(message)
+        tweetID = api.user_timeline(screename = tc.BOT_HANDLE, count = 1)[0].id
+        jd.insertQuestion(tweetID, jd["category"], jq["value"], jq["question"], jq["answer"])
+        
+        yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
+
+        lastQuestion = jd.getQuestionOn(yesterday)
+
+        if lastQuestion != None:
+            api.update_status(lastQuestion[5], lastQuestion[1])
+
     except tweepy.error.TweepError:
         print("Authentication Error")
+
+    jd.close()
