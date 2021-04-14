@@ -38,6 +38,7 @@ def getJeopardyQuestion() -> dict:
 
 if __name__ == "__main__":
     jd = jeopardyDatabase.JeopardyDatabase()
+    jd.createTable()
     auth = tweepy.OAuthHandler(tc.API_KEY, tc.API_SECRET_KEY)
     auth.set_access_token(tc.ACCESS_TOKEN, tc.ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -47,7 +48,7 @@ if __name__ == "__main__":
         message = "{} for ${}:\n{}".format(jq["category"], jq["value"], jq["question"])
         api.update_status(message)
         tweetID = api.user_timeline(screename = tc.BOT_HANDLE, count = 1)[0].id
-        jd.insertQuestion(tweetID, jd["category"], jq["value"], jq["question"], jq["answer"])
+        jd.insertQuestion(tweetID, jq["category"], jq["value"], jq["question"], jq["answer"])
         
         yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
 
