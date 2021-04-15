@@ -52,7 +52,7 @@ if __name__ == "__main__":
         
         #yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
         lastHour = datetime.datetime.now() - datetime.timedelta(hours = 1)
-        lastQuestion = jd.getQuestionOn(lastHour)
+        lastQuestion = jd.getHourQuestion(lastHour)
         
         if lastQuestion != None:
             api.update_status("Correct Response: {}".format(lastQuestion[5]), lastQuestion[1])
