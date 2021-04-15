@@ -30,6 +30,14 @@ class JeopardyDatabase:
         self.cursor.execute('''SELECT * FROM QUESTIONS WHERE DATE(DATE) >= "{}" AND DATE(DATE) < "{}"'''.format(currentDay, nextDay))
         return self.cursor.fetchone()
 
+    def getHourQuestion(self, date: datetime.datetime) -> tuple:
+        '''Gets the data from the specified hour'''
+        currentHour = "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(date.year, date.month, date.day, date.hour, date.minute, date.second)
+        nextDate = date + datetime.timedelta(hours = 1)
+        nextHour = "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(nextDate.year, nextDate.month, nextDate.day, nextDate.hour, nextDate.minute, nextDate.second)
+        self.cursor.execute('''SELECT * FROM QUESTIONS WHERE DATETIME(DATE) >= "{}" AND DATETIME(DATE) < "{}"'''.format(currentHour, nextHour))
+        return self.cursor.fetchone()
+
     def close(self):
         '''Closes the connection to the database'''
         self.db.commit()
