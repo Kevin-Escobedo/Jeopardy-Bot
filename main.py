@@ -53,7 +53,7 @@ if __name__ == "__main__":
         yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
         lastQuestion = jd.getQuestionOn(yesterday)
         if lastQuestion != None:
-            api.update_status("The Correct Response: {}".format(lastQuestion[5]), lastQuestion[1])
+            api.update_status("Correct Response: {}".format(lastQuestion[5]), lastQuestion[1])
 
     except tweepy.error.TweepError:
         print("Authentication Error")
