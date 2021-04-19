@@ -44,18 +44,20 @@ if __name__ == "__main__":
     api = tweepy.API(auth)
     try:
         api.verify_credentials()
-        jq = getJeopardyQuestion()
-        message = "{} for ${}:\n{}".format(jq["category"], jq["value"], jq["question"])
-        api.update_status(message)
-        tweetID = api.user_timeline(screename = tc.BOT_HANDLE, count = 1)[0].id
-        jd.insertQuestion(tweetID, jq["category"], jq["value"], jq["question"], jq["answer"])
-        
-        #yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
         lastHour = datetime.datetime.now() - datetime.timedelta(hours = 1)
         lastQuestion = jd.getHourQuestion(lastHour)
         
         if lastQuestion != None:
             api.update_status("Correct Response: {}".format(lastQuestion[5]), lastQuestion[1])
+        
+        jq = getJeopardyQuestion()
+        message = "{} for ${}:\n{}".format(jq["category"], jq["value"], jq["question"])
+        if all(jq.values()):
+            api.update_status(message)
+            tweetID = api.user_timeline(screename = tc.BOT_HANDLE, count = 1)[0].id
+            jd.insertQuestion(tweetID, jq["category"], jq["value"], jq["question"], jq["answer"])
+        
+        #yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
 
     except tweepy.error.TweepError:
         print("Authentication Error")
