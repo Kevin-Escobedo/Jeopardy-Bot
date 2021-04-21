@@ -2,6 +2,7 @@ import requests
 import json
 import tweepy
 import datetime
+import time
 import twitterCredentials as tc #File containing api key, secret key, tokens
 import jeopardyDatabase
 
@@ -36,6 +37,21 @@ def getJeopardyQuestion() -> dict:
 
     return questionInfo
 
+def getValidQuestion(tries: int = 10) -> dict:
+    '''Keeps trying to pull a Jeopardy question with no None values'''
+    while tries > 0:
+        tries -= 1
+        question = getJeopardyQuestion()
+
+        if all(question.values()): #Check if every value of question is not None
+            return question
+
+        else:
+            time.sleep(5) #Wait 5 seconds before calling the jService API again
+
+    return None #Return None if failed after all tries
+        
+
 if __name__ == "__main__":
     jd = jeopardyDatabase.JeopardyDatabase()
     jd.createTable()
@@ -50,14 +66,12 @@ if __name__ == "__main__":
         if lastQuestion != None:
             api.update_status("Correct Response: {}".format(lastQuestion[5]), lastQuestion[1])
         
-        jq = getJeopardyQuestion()
+        jq = getValidQuestion()
         message = "{} for ${}:\n{}".format(jq["category"], jq["value"], jq["question"])
-        if all(jq.values()):
-            api.update_status(message)
-            tweetID = api.user_timeline(screename = tc.BOT_HANDLE, count = 1)[0].id
-            jd.insertQuestion(tweetID, jq["category"], jq["value"], jq["question"], jq["answer"])
+        api.update_status(message)
+        tweetID = api.user_timeline(screename = tc.BOT_HANDLE, count = 1)[0].id
+        jd.insertQuestion(tweetID, jq["category"], jq["value"], jq["question"], jq["answer"])
         
-        #yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
 
     except tweepy.error.TweepError:
         print("Authentication Error")
